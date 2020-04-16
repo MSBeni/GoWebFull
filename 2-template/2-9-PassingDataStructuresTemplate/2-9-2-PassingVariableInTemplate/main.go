@@ -1,0 +1,1 @@
+package __9_2_PassingVariableInTemplate
