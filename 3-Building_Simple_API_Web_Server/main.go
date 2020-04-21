@@ -1,27 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"GoWebFull/3-Building_Simple_API_Web_Server/handlers"
 	"log"
 	"net/http"
 )
 
-func roothandler(w http.ResponseWriter, r *http.Request){
-	// We add this if statement to mention that the root path is explicitly the "/"
-	if r.URL.Path != "/"{
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("The Access is not Defined \n"))
-		return
-	}
-	// if the path is correct then the code will be written to the server
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("RUNNING API VERSION 1 \n"))
-	fmt.Fprint(w, "The easiest API \n")
-}
 
 func main(){
 	// Checking for the handler function with http.HandleFunc command
-	http.HandleFunc("/", roothandler)
+	http.HandleFunc("/users", handlers.UsersRouter)
+	http.HandleFunc("/", handlers.RootHandler)
 	// running on the local host port defined
 	err := http.ListenAndServe("localhost:3000", nil)
 	if err != nil{
