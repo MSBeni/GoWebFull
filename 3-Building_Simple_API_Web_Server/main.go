@@ -9,6 +9,7 @@ import (
 
 func main(){
 	// Checking for the handler function with http.HandleFunc command
+	http.HandleFunc("/users/", handlers.UsersRouter)
 	http.HandleFunc("/users", handlers.UsersRouter)
 	http.HandleFunc("/", handlers.RootHandler)
 	// running on the local host port defined

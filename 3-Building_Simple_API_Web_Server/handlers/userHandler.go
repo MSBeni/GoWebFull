@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"GoWebFull/3-Building_Simple_API_Web_Server/users"
 	"encoding/json"
 	"errors"
+	"github.com/asdine/storm"
 	"gopkg.in/mgo.v2/bson"
 	"io/ioutil"
 	"net/http"
-	"GoWebFull/3-Building_Simple_API_Web_Server/users"
 )
 
 func bodyToUser(r *http.Request, u *users.User) error{
@@ -55,3 +56,22 @@ func usersPostOne(w http.ResponseWriter, r *http.Request){
 	// write the code to the header
 	w.WriteHeader(http.StatusCreated)
 }
+
+func usersGetOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId){
+	 u, err := users.One(id)
+	 if err != nil{
+		 if err == storm.ErrNotFound{
+		 	// StatusNotFound = 404 // RFC 7231, 6.5.4
+		 	PostError(w, http.StatusNotFound)
+		 	return
+		 }
+		 // StatusInternalServerError = 500 // RFC 7231, 6.6.1
+		 PostError(w, http.StatusInternalServerError)
+		 return
+	 }
+	 // StatusOK = 200 // RFC 7231, 6.3.1
+	 postBodyResponse(w, http.StatusOK, jsonResponse{"user": u})
+}
+
+
+

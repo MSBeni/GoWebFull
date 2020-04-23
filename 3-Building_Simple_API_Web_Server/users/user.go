@@ -1,3 +1,4 @@
+
 package users
 
 import (
@@ -8,7 +9,7 @@ import (
 
 // User type in order to define a user
 type User struct {
-	ID   bson.ObjectId  `json:"id" storm:"id"`
+	ID   bson.ObjectId  `json:"id"`
 	Name string `json:"name"`
 	Role string `json:"role"`
 }
@@ -41,17 +42,17 @@ func All()([]User, error){
 // One returns a single user from the database with the given id
 func One(id bson.ObjectId) (*User, error){
 	db, err := storm.Open(dbPath)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
-	s := new(User)
+	u := new(User)
 
-	err = db.One("One data", id, s)
+	err = db.One("ID", id, u)
 	if err != nil{
 		return nil, err
 	}
-	return s, nil
+	return u, nil
 }
 
 // Delete is a function to delete the record with the mentioned id from the database
