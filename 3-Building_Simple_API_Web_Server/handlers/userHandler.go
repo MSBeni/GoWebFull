@@ -73,5 +73,68 @@ func usersGetOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId){
 	 postBodyResponse(w, http.StatusOK, jsonResponse{"user": u})
 }
 
+func usersPutOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId){
+	u := new(users.User)
+	err := bodyToUser(r, u)
+	if err != nil{
+		PostError(w, http.StatusBadRequest)
+		return
+	}
+	u.ID = id
+	err = u.Save()
+	if err != nil{
+		if err == users.ErrRecordInvalid{
+			PostError(w, http.StatusBadRequest)
+		}else{
+			PostError(w, http.StatusInternalServerError)
+		}
+		return
+	}
+	postBodyResponse(w, http.StatusOK, jsonResponse{"user": u})
+}
 
+func usersPatchOne(w http.ResponseWriter, r *http.Request, id bson.ObjectId){
+	u, err := users.One(id)
+	if err != nil{
+		if err == storm.ErrNotFound{
+			// StatusNotFound = 404 // RFC 7231, 6.5.4
+			PostError(w, http.StatusNotFound)
+			return
+		}
+		// StatusInternalServerError = 500 // RFC 7231, 6.6.1
+		PostError(w, http.StatusInternalServerError)
+		return
+	}
+	err = bodyToUser(r, u)
+	if err != nil{
+		PostError(w, http.StatusBadRequest)
+		return
+	}
+	u.ID = id
+	err = u.Save()
+	if err != nil{
+		if err == users.ErrRecordInvalid{
+			PostError(w, http.StatusBadRequest)
+		}else{
+			PostError(w, http.StatusInternalServerError)
+		}
+		return
+	}
+	postBodyResponse(w, http.StatusOK, jsonResponse{"user": u})
+}
+
+func usersDeleteOne(w http.ResponseWriter, _ *http.Request, id bson.ObjectId){
+	err := users.Delete(id)
+	if err != nil{
+		if err == storm.ErrNotFound{
+			// StatusNotFound = 404 // RFC 7231, 6.5.4
+			PostError(w, http.StatusNotFound)
+			return
+		}
+		// StatusInternalServerError = 500 // RFC 7231, 6.6.1
+		PostError(w, http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
 
