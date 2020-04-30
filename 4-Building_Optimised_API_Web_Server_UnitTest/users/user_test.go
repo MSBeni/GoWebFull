@@ -6,12 +6,142 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
 func TestMain(m *testing.M){
 	m.Run()
 	os.Remove(dbPath)
+}
+
+func cleanDb(b *testing.B) {
+	os.Remove(dbPath)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		u := &User{
+			ID:   bson.NewObjectId(),
+			Name: "John",
+			Role: "Tester",
+		}
+		err := u.Save()
+		if err != nil {
+			b.Fatalf("Error saving the record %s", err)
+		}
+	}
+	b.ResetTimer()
+}
+
+func BenchmarkCreate(b *testing.B) {
+	cleanDb(b)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		u := &User{
+			ID:   bson.NewObjectId(),
+			Name: "John" + strconv.Itoa(i),
+			Role: "Tester",
+		}
+		b.StartTimer()
+		err := u.Save()
+		if err != nil {
+			b.Fatalf("Error saving the record %s", err)
+		}
+	}
+}
+
+func BenchmarkRead(b *testing.B) {
+	cleanDb(b)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		u := &User{
+			ID:   bson.NewObjectId(),
+			Name: "John" + strconv.Itoa(i),
+			Role: "Tester",
+		}
+		err := u.Save()
+		if err != nil {
+			b.Fatalf("Error saving the record %s", err)
+		}
+		b.StartTimer()
+		_, err = One(u.ID)
+		if err!=nil{
+			b.Fatalf("Error retreiving the record %s", err)
+		}
+	}
+}
+
+func BenchmarkUpdate(b *testing.B) {
+	cleanDb(b)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		u := &User{
+			ID:   bson.NewObjectId(),
+			Name: "John" + strconv.Itoa(i),
+			Role: "Tester",
+		}
+		err := u.Save()
+		if err != nil {
+			b.Fatalf("Error saving the record %s", err)
+		}
+		b.StartTimer()
+		u.Role = "developer"
+		err = u.Save()
+		if err!=nil{
+			b.Fatalf("Error saving the record %s", err)
+		}
+
+	}
+}
+
+
+func BenchmarkDelete(b *testing.B) {
+	cleanDb(b)
+	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		u := &User{
+			ID:   bson.NewObjectId(),
+			Name: "John" + strconv.Itoa(i),
+			Role: "Tester",
+		}
+		err := u.Save()
+		if err != nil {
+			b.Fatalf("Error saving the record %s", err)
+		}
+		b.StartTimer()
+		err = Delete(u.ID)
+		if err!=nil{
+			b.Fatalf("Error removing the record %s", err)
+		}
+	}
+}
+
+func BenchmarkCRUD(b *testing.B){
+	os.Remove(dbPath)
+	b.ResetTimer()
+	for i := 0; i<b.N;i++{
+	u := &User{
+		ID:   bson.NewObjectId(),
+		Name: "John",
+		Role: "Tester",
+	}
+	err := u.Save()
+	if err!=nil{
+		b.Fatalf("Error saving the record %s", err)
+	}
+	_, err = One(u.ID)
+	if err!=nil{
+		b.Fatalf("Error retreiving the record %s", err)
+	}
+	u.Role = "developer"
+	err = u.Save()
+	if err!=nil{
+		b.Fatalf("Error saving the record %s", err)
+	}
+	err = Delete(u.ID)
+	if err!=nil{
+		b.Fatalf("Error removing the record %s", err)
+	}
+	}
 }
 
 func TestCRUD(t *testing.T){
@@ -73,7 +203,7 @@ func TestCRUD(t *testing.T){
 	if err!= nil{
 		log.Fatalf("Error reading all records %s", err)
 	}
-	if len(users) != 4{
+	if len(users) != 2{
 		t.Errorf("Different number of records retrieved. Expected: 3 / Actual: %d ", len(users))
 
 	}
