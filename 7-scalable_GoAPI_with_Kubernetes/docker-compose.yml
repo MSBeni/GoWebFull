@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  db:
+    container_name: bulletindb
+    image: postgress
+    hostname: db
+    environment:
+      GET_HOST_FROM: dns
+      POSTGRESS_DB: dev
+      POSTGRESS_USER: postgress-dev
+      POSTGRESS_PASWORD: mysecretpassword
+    ports:
+      - 5432:5432
+    networks:
+      - bulletinnet
+  bulletinapi:
+    container_name: bulletinapi
+    image: kisulken/bulletinapi:v1
+    hostname: bulletinapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      GET_HOSTS_FROM: dns
+    networks:
+      - bulletinnet
+    volumes:
+      - .:/go/src/GoWebFull/7-scalable_GoAPI_with_Kubernetes
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    links:
+      - db
+    labels:
+      kompose.service.type: LoadBalancer
+networks:
+  bulletinnet:
+    driver: bridge
