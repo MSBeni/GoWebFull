@@ -50,7 +50,7 @@ func GetBulletins()([]Bulletin, error){
 			CreatedAt: createAt,
 		})
 	}
-	return nil, nil
+	return results, nil
 }
 
 func AddBulletin(bulletin Bulletin)error{
