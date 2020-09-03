@@ -1,0 +1,61 @@
+FOR u IN users
+  FOR p IN products
+    FILTER u._key == p.recommendedBy
+    INSERT { _from: u._id, _to: p._id } INTO recommendations
+
+#################################### TESTED QUERIES ######################################
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' RETURN v
+
+FOR user IN Users FILTER user._id == 'Users/660ecb21' RETURN user
+
+
+INSERT { _from: 'Users/660ecb21', _to: 'Users/e83d1009'} INTO 'Friendship'
+
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/660ecb21" RETURN v
+
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/715d7972" RETURN e.Created
+
+FOR user IN Friendship FILTER user._from == 'Users/660ecb21' && user._to == 'Users/e83d1009' RETURN user._id
+
+
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/660ecb21" UPDATE e with {Created: "03-08-2020 08:26:25"} IN 'Friendship'
+
+INSERT { _from: 'Users/08dfd236', _to: 'Users/e83d1009', User:  {
+    "_key": "08dfd236",
+    "_id": "Users/08dfd236",
+    "_rev": "_bCYrvf---G",
+    "UserName": "SimonaMorasca",
+    "LowerName": "simonamorasca",
+    "FirstName": "Simona",
+    "LastName": "Morasca",
+    "Email": "simona@morasca.com",
+    "KeepEmailPrivate": "true",
+    "PasswordHash": "152505361532103699396093284394519833739",
+    "PasswordCost": "84",
+    "PasswordHashAlg": "MD-5",
+    "MustChangePassword": "false",
+    "Location": "Ashland",
+    "Language": "fr",
+    "Description": "Chapman, Ross E Esq",
+    "CreatedUnix": "26-01-1997 18:43:23",
+    "UpdatedUnix": "26-06-1957 02:38:55",
+    "LastLoginUnix": "28-11-2018 02:53:25",
+    "IsActive": "true",
+    "IsAdmin": "true",
+    "IsVerified": "true",
+    "IsRestricted": "false",
+    "Avatar": "OH",
+    "AvatarEmail": "http://www.chapmanrosseesq.com",
+    "NumFollowers": "6",
+    "NumFollowing": "0",
+    "NumStars": "54",
+    "NumRepos": "55"
+  }, Created:"03-09-2020 07:40:19", Assets:{"AccountID":"d2d04","Amount":"143"}} INTO 'Friendship'
+#############################################################################################
+
+INSERT {Created: "03-08-2020 08:26:25"} INTO 'Friendship' OPTIONS {}
+
+INSERT { _from: 'Users/08dfd236', _to: 'Users/e83d1009', } INTO 'Friendship'
+
+
+

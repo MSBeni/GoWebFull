@@ -252,7 +252,7 @@ func main(){
 	}
 	cursor, err = db.Query(ctx, getProductbyID2, bindVars)
 	if err != nil {
-		// handle error
+		panic(err)
 	}
 	defer cursor.Close()
 	for {
