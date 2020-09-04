@@ -7,6 +7,8 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
 	"log"
+	"time"
+
 	//"strconv"
 	//"time"
 )
@@ -67,7 +69,7 @@ type Friendship struct {
 	//To string `json:"_to,omitempty"`
 }
 
-func main(){
+func main() {
 
 	conn, err := http.NewConnection(http.ConnectionConfig{
 		Endpoints: []string{"http://localhost:8529"},
@@ -77,7 +79,7 @@ func main(){
 		fmt.Println(err)
 	}
 	c, err := driver.NewClient(driver.ClientConfig{
-		Connection: conn,
+		Connection:     conn,
 		Authentication: driver.BasicAuthentication("...", "..."),
 	})
 	if err != nil {
@@ -85,104 +87,68 @@ func main(){
 
 	}
 	// Open "examples_books" database
-	db, err := c.Database(nil, "Comvest")
+	db, err := c.Database(nil, "_system")
 	if err != nil {
 		panic(err)
 	}
 
+	_from := "_from"
+	_to := "_to"
+
 	ctx := context.Background()
-	query := "FOR d IN Friendship LIMIT 10 RETURN d"
-	//query :="FOR doc IN Friendship FILTER doc.foo == @BrittniGillaspie RETURN doc"
-	cursor, err := db.Query(ctx, query, nil)
+	query := fmt.Sprintf(`FOR user IN Friendship FILTER user.%s == @Follower && user.%s == @Following RETURN user._id`, _from, _to)
+
+	//query := fmt.Sprintf(`FOR user IN Friendship FILTER user._from == "Users/08dfd236" && user._to == "Users/e83d1009" RETURN user`)
+	bindVars := map[string]interface{}{
+		"Follower": "Users/f7755fa8",
+		"Following": "Users/08dfd236",
+	}
+	cursor, err := db.Query(ctx, query, bindVars)
+
+	//cursor, err := db.Query(ctx, query, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx = context.Background()
-	getUsertbyID2 := fmt.Sprintf(`FOR user IN Users FILTER user.FirstName == @name RETURN user`)
-	//query3 := `FOR user IN Users FILTER user._key == @key RETURN user`
-	bindVars := map[string]interface{}{
-		"name": "James",
-	}
-	//bindVars2 := map[string]interface{}{
-	//	"key": "3e5e6a05",
-	//}
-	cursor, err = db.Query(ctx, getUsertbyID2, bindVars)
-	//cursor, err = db.Query(ctx, query3, bindVars2)
-	if err != nil {
-		panic(err)
-	}
-	//defer cursor.Close()
-	for {
-		user_ := Users{}
 
-		_, err := cursor.ReadDocument(ctx, &user_)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
+	var id string
+
+
+	_, err = cursor.ReadDocument(ctx, &id)
+	if err != nil{
+		query2 := fmt.Sprintf(`FOR user IN Users FILTER user._id == @id RETURN user`)
+		bindVars2 := map[string]interface{}{
+			"id": "Users/f7755fa8",
+		}
+		cursor2, err := db.Query(ctx, query2, bindVars2)
+		var user Users
+		_, err = cursor2.ReadDocument(ctx, &user)
+		fmt.Println(">>>>>>>>>>>>>", user)
+
+		querynew := fmt.Sprintf(`INSERT { _from: @Follower, _to: @Following, User:  @UserFollower, Created:@CreateTime, Asset:@Assets} INTO Friendship`)
+		timeNow := time.Now().Format("2006-01-02 15:04:05")
+		fmt.Println(">>>>>>>>>>>>>", timeNow)
+		bindVars = map[string]interface{}{
+			"Follower": "Users/f7755fa8",
+			"Following": "Users/08dfd236",
+			"UserFollower": user,
+			"CreateTime":timeNow,
+			"Assets":Assets{"z2e09", "154"},
+		}
+		cursor, err = db.Query(ctx, querynew, bindVars)
+		if err != nil{
 			panic(err)
 		}
-		//fmt.Printf("Got doc with key '%s' from query\n", meta2.Key)
-		fmt.Println(user_)
-	}
 
-	var graph driver.Graph
-	if ok, _ := db.GraphExists(nil, "Followings"); ok {
-		graph, _ = db.Graph(nil, "Followings")
-	} else {
-		graph, _ = db.CreateGraph(nil, "Followings", nil)
+	}else{
+		fmt.Println("ID of the Friendship is >>>>>", id)
 	}
 
 
-	fmt.Println(graph.Name())
-
-	fmt.Println(graph.EdgeCollections(ctx))
-
-
-	query2 := "FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' RETURN e"
-
-	cursor, err = db.Query(ctx, query2, nil)
-	if err != nil {
-		panic(err)
-	}
-
-	for {
-		relation_ := Friendship{}
-
-		meta, err := cursor.ReadDocument(ctx, &relation_)
-		if driver.IsNoMoreDocuments(err) {
-			break
-		} else if err != nil {
-			panic(err)
-		}
-		query4 := `FOR user IN Users FILTER user._key == @key RETURN user`
-		bindVars3 := map[string]interface{}{
-			"key": meta.Key,
-		}
-		fmt.Printf("###### the Key of the user is  >>>>>>>>> '%s' '\n'", meta.Key)
-		//cursor, err = db.Query(ctx, getUsertbyID2, bindVars)
-		cursor2, err := db.Query(ctx, query4, bindVars3)
-		if err != nil {
-			panic(err)
-		}
-		//defer cursor.Close()
-		for {
-			user_ := Users{}
-
-			_, err := cursor2.ReadDocument(ctx, &user_)
-			if driver.IsNoMoreDocuments(err) {
-				break
-			} else if err != nil {
-				panic(err)
-			}
-			//fmt.Printf("Got doc with key '%s' from query\n", meta2.Key)
-			fmt.Println(user_)
-		}
-	}
-
-
-
-
-
+	//fmt.Println("ID of the Friendship is >>>>>", id)
 
 }
+
+
+
+
