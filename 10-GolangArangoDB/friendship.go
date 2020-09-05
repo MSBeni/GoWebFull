@@ -80,7 +80,7 @@ func main() {
 	}
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("root", ""),
+		Authentication: driver.BasicAuthentication("root", "..."),
 	})
 	if err != nil {
 		panic(err)
