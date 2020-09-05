@@ -51,6 +51,10 @@ INSERT { _from: 'Users/08dfd236', _to: 'Users/e83d1009', User:  {
     "NumStars": "54",
     "NumRepos": "55"
   }, Created:"03-09-2020 07:40:19", Assets:{"AccountID":"d2d04","Amount":"143"}} INTO 'Friendship'
+
+
+FOR user IN Friendship FILTER user._from == 'Users/660ecb21' && user._to == 'Users/e83d1009' REMOVE user IN Friendship
+
 #############################################################################################
 
 INSERT {Created: "03-08-2020 08:26:25"} INTO 'Friendship' OPTIONS {}
