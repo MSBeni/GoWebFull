@@ -18,7 +18,12 @@ FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == 
 FOR user IN Friendship FILTER user._from == 'Users/660ecb21' && user._to == 'Users/e83d1009' RETURN user._id
 
 
+## >>>>>>>>>> UPDATING Graphs
 FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/660ecb21" UPDATE e with {Created: "03-08-2020 08:26:25"} IN 'Friendship'
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/660ecb21" UPDATE e with {Assets: {Amount:"255"}} IN 'Friendship'
+
+
+
 
 INSERT { _from: 'Users/08dfd236', _to: 'Users/e83d1009', User:  {
     "_key": "08dfd236",
@@ -94,3 +99,15 @@ INSERT { _from: 'Users/08dfd236', _to: 'Users/e83d1009', User:    {
     "NumStars": "30",
     "NumRepos": "99"
   }, Created:"03-09-2020 07:40:19", Assets:{"AccountID":"d2d04","Amount":"143"}} INTO 'Friendship'
+
+
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/660ecb21" UPDATE e with {Assets.Amount: "225"} IN 'Friendship'
+
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' FILTER v._id == "Users/660ecb21" RETURN p.edges[0]._key
+
+### Return all followers
+FOR v, e, p in 1..1 INBOUND 'Users/e83d1009' GRAPH 'Followings' RETURN v
+
+
+### Return all followings
+FOR v, e, p in 1..1 OUTBOUND 'Users/e83d1009' GRAPH 'Followings' RETURN v
