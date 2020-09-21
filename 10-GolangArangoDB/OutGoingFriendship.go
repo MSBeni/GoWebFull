@@ -91,20 +91,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	UserName := "UserName"
-	Users := "Users"
+	_id := "Users/f7755fa8"
+	//Users := "Users"
 	//_from := "_from"
 	//_to := "_to"
-	NEWAMOUNT := "387"
-
-	_FromUserName := "AmberMonarrez"
-	_ToUserName := "JunitaBrideau"
+	//NEWAMOUNT := "387"
+	//
+	//_FromUserName := "AmberMonarrez"
+	//_ToUserName := "JunitaBrideau"
 	ctx := context.Background()
 
-	getUser := fmt.Sprintf(`FOR user IN %s FILTER user.%s == @UserName RETURN user`, Users, UserName)
+	getUser := fmt.Sprintf(`FOR v, e, p in 1..1 OUTBOUND @_id GRAPH 'Followings' RETURN v`)
 
 	bindVars := map[string]interface{}{
-		"UserName": _ToUserName,
+		"_id": _id,
 	}
 	cursor, err := db.Query(ctx, getUser, bindVars)
 	if err != nil {
@@ -115,39 +115,24 @@ func main() {
 	if !cursor.HasMore() {
 		panic(err)
 	}
+	OutgoingList := []UsersNew{}
 
-	var user UsersNew
-	meta, err := cursor.ReadDocument(ctx, &user)
-	fmt.Println("Who is Followed is >>>>> ", meta.ID, user)
+	for {
+		user_ := UsersNew{}
 
-	bindVars2 := map[string]interface{}{
-		"UserName": _FromUserName,
+		_, err := cursor.ReadDocument(ctx, &user_)
+		if driver.IsNoMoreDocuments(err) {
+			break
+		} else if err != nil {
+			panic(err)
+		}
+		//fmt.Printf("Got doc with key '%s' from query\n", meta2.Key)
+		//fmt.Println(user_)
+		OutgoingList = append(OutgoingList, user_)
 	}
-	cursor2, err := db.Query(ctx, getUser, bindVars2)
-	if err != nil {
-		panic(err)
-	}
-	//defer cursor.Close()
+	fmt.Println(OutgoingList)
+	//var user UsersNew
+	//meta, err := cursor.ReadDocument(ctx, &user)
+	//fmt.Println("Who is Followed is >>>>> ", meta.ID, user)
 
-	if !cursor2.HasMore() {
-		panic(err)
-	}
-
-	var user2 UsersNew
-	meta2, err := cursor2.ReadDocument(ctx, &user2)
-	fmt.Println("Follower is >>>>> ", meta2.ID, user2)
-
-	queryNEW := `FOR v, e, p in 1..1 INBOUND @following GRAPH 'Followings' FILTER v._id == @follower UPDATE e with {Assets: {Amount:@amount}} IN 'Friendship'`
-	bindVars = map[string]interface{}{
-		"following": meta.ID,
-		"follower": meta2.ID,
-		"amount":NEWAMOUNT,
-	}
-	cursor, err = db.Query(ctx, queryNEW, bindVars)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("The AMOUNT is Updated ...")
 }
-
-
