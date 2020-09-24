@@ -7,6 +7,7 @@ import (
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
 	"sort"
+	//"strconv"
 
 	//"log"
 	//"time"
@@ -82,7 +83,7 @@ func main() {
 	}
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("root", "..."),
+		Authentication: driver.BasicAuthentication("root", "...."),
 	})
 	if err != nil {
 		panic(err)
@@ -93,7 +94,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//_id := "Users/f7755fa8"
+	UserName := "UserName"
 
 	ctx := context.Background()
 
@@ -178,10 +179,32 @@ func main() {
 			}
 		}
 	}
+	//i, err := strconv.Atoi("10")
+	//fmt.Println(SugestedUserNames)
+	//fmt.Println(len(SugestedUserNames))
+	//fmt.Println(SugestedUserNames[:i])
+	OutgoingList := []UsersNew{}
+	for _, usn:= range SugestedUserNames[:10]{
+		getUserbyUsername := fmt.Sprintf(`FOR user IN Users FILTER user.%s == @UserName RETURN user`, UserName)
+		bindVars := map[string]interface{}{
+			"UserName": usn,
+		}
+		cursor, err := db.Query(ctx, getUserbyUsername, bindVars)
+		if err != nil {
+			panic(err)
+		}
+		//defer cursor.Close()
 
-	fmt.Println(SugestedUserNames)
-	fmt.Println(len(SugestedUserNames))
-	fmt.Println(SugestedUserNames[:10])
+		if !cursor.HasMore() {
+			panic(err)
+		}
+		user_ := UsersNew{}
+
+		_, err = cursor.ReadDocument(ctx, &user_)
+
+		OutgoingList = append(OutgoingList, user_)
+	}
+	fmt.Println(OutgoingList)
 	//for _, k := range keys {
 	//	fmt.Println(k, UsersRep[k])
 	//}
