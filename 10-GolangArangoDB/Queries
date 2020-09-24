@@ -60,6 +60,13 @@ INSERT { _from: 'Users/08dfd236', _to: 'Users/e83d1009', User:  {
 
 FOR user IN Friendship FILTER user._from == 'Users/660ecb21' && user._to == 'Users/e83d1009' REMOVE user IN Friendship
 
+
+LET n=0
+FOR u IN Users
+  FOR f IN Friendship
+    FILTER u._id == 'Users/660ecb21'  &&  u._id == f._to
+    RETURN n
+
 #############################################################################################
 
 INSERT {Created: "03-08-2020 08:26:25"} INTO 'Friendship' OPTIONS {}

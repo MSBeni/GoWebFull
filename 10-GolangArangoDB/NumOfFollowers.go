@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
+	"sort"
+
 	//"log"
 	//"time"
 
@@ -80,7 +82,7 @@ func main() {
 	}
 	c, err := driver.NewClient(driver.ClientConfig{
 		Connection:     conn,
-		Authentication: driver.BasicAuthentication("root", "root1!!!"),
+		Authentication: driver.BasicAuthentication("root", "..."),
 	})
 	if err != nil {
 		panic(err)
@@ -91,22 +93,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_id := "Users/f7755fa8"
-	//Users := "Users"
-	//_from := "_from"
-	//_to := "_to"
-	//NEWAMOUNT := "387"
-	//
-	//_FromUserName := "AmberMonarrez"
-	//_ToUserName := "JunitaBrideau"
+	//_id := "Users/f7755fa8"
+
 	ctx := context.Background()
 
-	getUser := fmt.Sprintf(`FOR v, e, p in 1..1 OUTBOUND @_id GRAPH 'Followings' RETURN v`)
+	getUser := fmt.Sprintf(`FOR u IN Users
+									  FOR f IN Friendship
+										FILTER u._id == f._to
+										RETURN u.UserName`)
 
-	bindVars := map[string]interface{}{
-		"_id": _id,
-	}
-	cursor, err := db.Query(ctx, getUser, bindVars)
+	//bindVars := map[string]interface{}{
+	//	"_id": _id,
+	//}
+	cursor, err := db.Query(ctx, getUser, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -115,12 +114,14 @@ func main() {
 	if !cursor.HasMore() {
 		panic(err)
 	}
-	OutgoingList := []UsersNew{}
+	//OutgoingList := []UsersNew{}
+
+	users := []string{}
 
 	for {
-		user_ := UsersNew{}
-
-		_, err := cursor.ReadDocument(ctx, &user_)
+		//user_ := UsersNew{}
+		var usernames string
+		_, err := cursor.ReadDocument(ctx, &usernames)
 		if driver.IsNoMoreDocuments(err) {
 			break
 		} else if err != nil {
@@ -128,9 +129,64 @@ func main() {
 		}
 		//fmt.Printf("Got doc with key '%s' from query\n", meta2.Key)
 		//fmt.Println(user_)
-		OutgoingList = append(OutgoingList, user_)
+		//OutgoingList = append(OutgoingList, usernames)
+		users = append(users, usernames)
 	}
-	fmt.Println(OutgoingList)
+	uniqueUsernames := []string{}
+	//fmt.Println(users)
+	for i, el := range users{
+		//fmt.Println(i)
+		if i == 0 {
+			uniqueUsernames = append(uniqueUsernames, el)
+		}
+		n := 0
+		for _, UniqVal := range uniqueUsernames{
+			if el == UniqVal{
+				n += 1
+			}
+		}
+		if n == 0{
+			uniqueUsernames = append(uniqueUsernames, el)
+		}
+	}
+	//fmt.Println(uniqueUsernames)
+	//fmt.Println(len(uniqueUsernames))
+	UsersRep := map[string]int{}
+	for _, Newel := range uniqueUsernames{
+		Repet := 0
+		for _, RepEl := range users{
+			if Newel == RepEl {
+				Repet += 1
+			}
+		}
+		UsersRep[Newel] = Repet
+	}
+
+
+	SugestedUserNames := []string{}
+	Vals := make([]int, 0, len(UsersRep))
+	for _, val := range UsersRep {
+		Vals = append(Vals, val)
+	}
+	sort.Ints(Vals)
+	//fmt.Println(Vals)
+	length := len(Vals)
+	for i:=0; i<10; i++{
+		for k, v := range UsersRep{
+			if v == Vals[length-i-1] {
+				SugestedUserNames = append(SugestedUserNames, k)
+			}
+		}
+	}
+
+	fmt.Println(SugestedUserNames)
+	fmt.Println(len(SugestedUserNames))
+	fmt.Println(SugestedUserNames[:10])
+	//for _, k := range keys {
+	//	fmt.Println(k, UsersRep[k])
+	//}
+
+	//fmt.Println(UsersRep[k])
 	//var user UsersNew
 	//meta, err := cursor.ReadDocument(ctx, &user)
 	//fmt.Println("Who is Followed is >>>>> ", meta.ID, user)
