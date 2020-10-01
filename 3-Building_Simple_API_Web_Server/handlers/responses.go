@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"       // Package json implements encoding and decoding of JSON as defined in RFC 7159.
 	"net/http"
+	"strings"
 )
 
 
@@ -33,4 +34,9 @@ func postBodyResponse(w http.ResponseWriter, code int, content jsonResponse){
 	}
 	w.WriteHeader(code)
 	w.Write([]byte(http.StatusText(code)))
+}
+
+func postOptionsResponse(w http.ResponseWriter, methods []string, content jsonResponse){
+	w.Header().Set("Allow", strings.Join(methods, ","))
+	postBodyResponse(w, http.StatusOK, content)
 }

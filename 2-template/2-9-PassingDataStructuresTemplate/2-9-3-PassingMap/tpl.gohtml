@@ -6,9 +6,9 @@
 </head>
 <body>
 <ul>
-    {{range .}}
-    <li>{{.}}</li>
+    {{range $keys, $values :=.}}
+    <li>{{$keys}}: {{$values}}</li>
     {{end}}
 </ul>
-</body>>
+</body>
 </html>

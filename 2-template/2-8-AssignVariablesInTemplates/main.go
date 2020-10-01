@@ -13,7 +13,7 @@ func init(){
 }
 
 func main(){
-	err := tpl.ExecuteTemplate(os.Stdout, "tpl.gohtml", "Hey, we are checking for the variables in template")
+	err := tpl.ExecuteTemplate(os.Stdout, "tpl.gohtml", "is the efforts to gain the best ")
 	if err!=nil{
 		log.Fatalln(err)
 	}

@@ -5,7 +5,9 @@
     <title>Hello World!!!</title>
 </head>
 <body>
-    without data formatting: {{.}}
-    with data formatting: {{fdateMDY .}}
+    {{.}}
+    {{. | fdbl}}
+    {{. | fdbl | fsq}}
+    {{. | fdbl | fsq | fsqrt}}
 </body>
 </html>

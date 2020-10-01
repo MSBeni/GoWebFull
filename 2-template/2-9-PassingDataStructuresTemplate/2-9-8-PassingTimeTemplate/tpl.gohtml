@@ -5,15 +5,7 @@
     <title>Hello World!!!</title>
 </head>
 <body>
-<ul>
-    {{range .NameInfo}}
-        <li>{{uc .Name}}: {{ft .Known}}</li>
-    {{end}}
-</ul>
-<ul>
-    {{range .OtherInfo}}
-        <li>{{.Age}}: {{.Alive}}</li>
-    {{end}}
-</ul>
+    without data formatting: {{.}}
+    with data formatting: {{fdateMDY .}}
 </body>
 </html>

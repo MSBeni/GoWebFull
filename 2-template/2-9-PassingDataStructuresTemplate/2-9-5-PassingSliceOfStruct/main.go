@@ -12,15 +12,28 @@ type Director struct {
 }
 var tpl *template.Template
 func init(){
-	tpl = template.Must(template.ParseGlob("tpl2.gohtml"))
+	tpl = template.Must(template.ParseGlob("tpl.gohtml"))
 }
 func main(){
-	data := Director{
+	Abbas := Director{
 		Name:  "Kiarostami",
 		Known: "Reality",
 	}
-	//dataa := map[string]string{"Kiarostami":"Reality", "Polansky":"Gossip", "Haneke":"Psycho", "Wong Kar Wei":"Love"}
-	err := tpl.ExecuteTemplate(os.Stdout, "tpl2.gohtml", data)
+	Roman := Director{
+		Name:  "Polansky",
+		Known: "Gossip",
+	}
+	Michele := Director{
+		Name:  "Haneke",
+		Known: "Psycho",
+	}
+	Wong := Director{
+		Name:  "Wong Kar Wei",
+		Known: "Love",
+	}
+	data := []Director{Abbas, Roman, Michele, Wong}
+	err := tpl.ExecuteTemplate(os.Stdout, "tpl.gohtml", data)
+	//err := tpl.Execute(os.Stdout, data)
 	if err!=nil{
 		log.Fatalln(err)
 	}

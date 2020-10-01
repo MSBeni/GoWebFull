@@ -24,9 +24,9 @@ func main(){
 	</html>
 		`)
 
-	nf, err := os.Create("index.html")
+	nf, err := os.Create("tpl.gohtml")
 	if err!=nil{
-		log.Fatal("error creating the index.html file")
+		log.Fatal("error creating the tpl.gohtml file")
 	}
 	defer nf.Close()
 

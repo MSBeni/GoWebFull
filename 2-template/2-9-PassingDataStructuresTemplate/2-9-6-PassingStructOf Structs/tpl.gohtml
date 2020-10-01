@@ -6,8 +6,13 @@
 </head>
 <body>
 <ul>
-    {{range .}}
+    {{range .NameInfo}}
         <li>{{.Name}}: {{.Known}}</li>
+    {{end}}
+</ul>
+<ul>
+    {{range .OtherInfo}}
+        <li>{{.Age}}: {{.Alive}}</li>
     {{end}}
 </ul>
 </body>
