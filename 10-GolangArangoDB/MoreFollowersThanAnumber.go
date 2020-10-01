@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/arangodb/go-driver"
 	"github.com/arangodb/go-driver/http"
+	"sort"
+
 	//"sort"
 	//"strconv"
 
@@ -166,13 +168,44 @@ func main() {
 
 	chosenUsers := map[string]int{}
 	for key, val := range UsersRep{
-		if val >= 20{
+		if val >= 15{
 			chosenUsers[key] = val
 		}
 	}
+
+	fmt.Println(chosenUsers)
+	fmt.Println(len(chosenUsers))
+
+	SugestedUserNames := []string{}
+	Vals := make([]int, 0, len(chosenUsers))
+	for _, val := range chosenUsers {
+		Vals = append(Vals, val)
+	}
+
+	sort.Ints(Vals)
+	fmt.Println(Vals)
+
+	length := len(Vals)
+	No_ := 0
+	count := 10
+	for i:=0; i<length; i++{
+		for k, v := range chosenUsers{
+			if v == Vals[length-i-1] {
+				SugestedUserNames = append(SugestedUserNames, k)
+				No_ += 1
+			}
+		}
+		if No_ == count {
+			break
+		}
+	}
+
+	fmt.Println(">>>>>>", SugestedUserNames)
+	fmt.Println(">>>>>>", len(SugestedUserNames))
+
 	OutgoingList := []UsersNew{}
 
-	for usn, _:= range chosenUsers{
+	for _, usn:= range SugestedUserNames{
 		getUserbyUsername := fmt.Sprintf(`FOR user IN Users FILTER user.%s == @UserName RETURN user`, UserName)
 		bindVars := map[string]interface{}{
 			"UserName": usn,
